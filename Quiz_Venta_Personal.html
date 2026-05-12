@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Venta Personal - Universidad Fidélitas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1E2A8A 0%, #3B4BA5 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1E2A8A 0%, #3B4BA5 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        /* Pantalla de bienvenida */
+        .welcome-screen {
+            text-align: center;
+        }
+
+        .welcome-screen h2 {
+            color: #1E2A8A;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .welcome-screen p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        .name-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #60A5FA;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .name-input:focus {
+            outline: none;
+            border-color: #1E2A8A;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #1E2A8A 0%, #3B4BA5 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(30, 42, 138, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Pantalla de preguntas */
+        .quiz-screen {
+            display: none;
+        }
+
+        .progress-bar {
+            background: #E5E7EB;
+            height: 10px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #60A5FA 0%, #3B4BA5 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .question-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: #1E2A8A;
+        }
+
+        .score {
+            font-weight: bold;
+            color: #3B4BA5;
+        }
+
+        .question {
+            background: #F3F4F6;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #60A5FA;
+        }
+
+        .question h3 {
+            color: #1E2A8A;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 2px solid #E5E7EB;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.05em;
+        }
+
+        .option:hover {
+            border-color: #60A5FA;
+            background: #F0F9FF;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #1E2A8A;
+            background: #EEF2FF;
+        }
+
+        .option.correct {
+            border-color: #10B981;
+            background: #D1FAE5;
+            animation: pulse 0.5s;
+        }
+
+        .option.incorrect {
+            border-color: #EF4444;
+            background: #FEE2E2;
+            animation: shake 0.5s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .btn-next {
+            width: 100%;
+            margin-top: 20px;
+            display: none;
+        }
+
+        /* Pantalla de resultados */
+        .results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .results-screen h2 {
+            color: #1E2A8A;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .student-name {
+            font-size: 1.5em;
+            color: #3B4BA5;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .final-score {
+            background: linear-gradient(135deg, #60A5FA 0%, #3B4BA5 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .final-score .score-number {
+            font-size: 4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .final-score .score-text {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .performance {
+            background: #F3F4F6;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .performance h3 {
+            color: #1E2A8A;
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #60A5FA;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #1E2A8A;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .final-score .score-number {
+                font-size: 3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Quiz Venta Personal</h1>
+            <p>Universidad Fidélitas • 2026</p>
+        </div>
+
+        <!-- Pantalla de bienvenida -->
+        <div class="content welcome-screen" id="welcomeScreen">
+            <h2>¡Bienvenido al Quiz!</h2>
+            <p>Pon a prueba tus conocimientos sobre Venta Personal. Responde 15 preguntas y demuestra lo que aprendiste.</p>
+            <input type="text" class="name-input" id="studentName" placeholder="Ingresá tu nombre completo" maxlength="50">
+            <button class="btn" onclick="startQuiz()">Comenzar Quiz</button>
+        </div>
+
+        <!-- Pantalla de preguntas -->
+        <div class="content quiz-screen" id="quizScreen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="question-info">
+                <span class="question-number">Pregunta <span id="currentQuestion">1</span> de 15</span>
+                <span class="score">Puntos: <span id="currentScore">0</span></span>
+            </div>
+
+            <div class="question" id="questionContainer">
+                <!-- Las preguntas se cargarán aquí -->
+            </div>
+
+            <button class="btn btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente Pregunta</button>
+        </div>
+
+        <!-- Pantalla de resultados -->
+        <div class="content results-screen" id="resultsScreen">
+            <h2>¡Quiz Completado! 🎉</h2>
+            <div class="student-name" id="finalStudentName"></div>
+            
+            <div class="final-score">
+                <div class="score-number" id="finalScore">0</div>
+                <div class="score-text">puntos obtenidos</div>
+            </div>
+
+            <div class="performance">
+                <h3 id="performanceMessage"></h3>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-value" id="correctAnswers">0</div>
+                        <div class="stat-label">Correctas</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="incorrectAnswers">0</div>
+                        <div class="stat-label">Incorrectas</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="percentage">0%</div>
+                        <div class="stat-label">Porcentaje</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="restartQuiz()">Reiniciar Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        // Preguntas del quiz
+        const questions = [
+            {
+                question: "¿Cuál es la principal característica de la venta personal?",
+                options: [
+                    "Comunicación masiva unidireccional",
+                    "Interacción directa entre vendedor y comprador",
+                    "Uso exclusivo de medios digitales",
+                    "Enfoque únicamente en el precio"
+                ],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "Según Davis (1996), ¿cuál NO es uno de los roles del vendedor relacional?",
+                options: [
+                    "Estudiante",
+                    "Médico",
+                    "Competidor",
+                    "Granjero"
+                ],
+                correct: 2,
+                points: 10
+            },
+            {
+                question: "¿Qué significa CIM en el contexto de la venta personal?",
+                options: [
+                    "Centro de Información de Marketing",
+                    "Comunicación Integrada de Marketing",
+                    "Control Interno de Mercados",
+                    "Comunicación Internacional de Medios"
+                ],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "¿Cuál es la primera etapa del proceso de venta personal?",
+                options: [
+                    "Presentación",
+                    "Cierre de venta",
+                    "Prospección",
+                    "Posventa"
+                ],
+                correct: 2,
+                points: 10
+            },
+            {
+                question: "¿Qué es la venta relacional o relationship selling?",
+                options: [
+                    "Venta basada solo en descuentos",
+                    "Enfoque en personalización, empatía y confianza mutua",
+                    "Venta exclusivamente online",
+                    "Técnica de venta agresiva"
+                ],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "¿Cuál herramienta de apoyo sirve para organizar información de clientes?",
+                options: [
+                    "Catálogo",
+                    "CRM",
+                    "Página web",
+                    "Presentación digital"
+                ],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "¿Qué característica NO corresponde a un vendedor exitoso?",
+                options: [
+                    "Empatía",
+                    "Resiliencia",
+                    "Impaciencia",
+                    "Comunicación efectiva"
+                ],
+                correct: 2,
+                points: 10
+            },
+            {
+                question: "¿Cuál es una nueva tendencia en venta personal?",
+                options: [
+                    "Eliminar completamente el contacto humano",
+                    "Social Selling",
+                    "Usar solo llamadas telefónicas",
+                    "Evitar las redes sociales"
+                ],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "¿En qué se diferencia la venta personal de la publicidad?",
+                options: [
+                    "La publicidad es más cara",
+                    "La venta personal adapta el mensaje en tiempo real",
+                    "La publicidad es más efectiva",
+                    "No hay diferencias significativas"
+                ],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "¿Qué empresa es ejemplo de venta personal directa con representantes?",
+                options: [
+                    "Amazon",
+                    "Avon",
+                    "Netflix",
+                    "Uber"
+                ],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "¿Cuál es un beneficio de la venta personal para las empresas?",
+                options: [
+                    "Es más barata que la publicidad",
+                    "No requiere capacitación",
+                    "Permite retroalimentación inmediata",
+                    "Elimina la competencia"
+                ],
+                correct: 2,
+                points: 10
+            },
+            {
+                question: "¿Qué busca principalmente la venta personal a diferencia de las RRPP?",
+                options: [
+                    "Construir reputación a largo plazo",
+                    "Cerrar transacciones directas e inmediatas",
+                    "Gestión de crisis",
+                    "Relación con medios de comunicación"
+                ],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "¿Qué aplicó Kim Kardashian con KKW Beauty?",
+                options: [
+                    "Venta tradicional en tiendas",
+                    "Solo publicidad en TV",
+                    "Venta personal digital con interacción directa",
+                    "Venta telefónica"
+                ],
+                correct: 2,
+                points: 10
+            },
+            {
+                question: "¿Qué es Account-Based Selling (ABS)?",
+                options: [
+                    "Venta a cualquier cliente",
+                    "Priorizar cuentas estratégicas de alto valor",
+                    "Vender solo productos básicos",
+                    "Venta sin seguimiento"
+                ],
+                correct: 1,
+                points: 10
+            },
+            {
+                question: "¿Cuál es el enfoque de la venta consultiva?",
+                options: [
+                    "Presionar al cliente para comprar",
+                    "Actuar como asesor identificando problemas y proponiendo soluciones",
+                    "Vender el producto más caro",
+                    "Enfocarse solo en el precio"
+                ],
+                correct: 1,
+                points: 10
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let correctCount = 0;
+        let incorrectCount = 0;
+        let studentName = '';
+        let answered = false;
+
+        function startQuiz() {
+            studentName = document.getElementById('studentName').value.trim();
+            if (!studentName) {
+                alert('Por favor ingresá tu nombre para comenzar');
+                return;
+            }
+
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('quizScreen').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answered = false;
+            const question = questions[currentQuestionIndex];
+            const container = document.getElementById('questionContainer');
+            
+            let html = `<h3>${question.question}</h3><div class="options">`;
+            
+            question.options.forEach((option, index) => {
+                html += `<div class="option" onclick="selectAnswer(${index})">${option}</div>`;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function selectAnswer(selected) {
+            if (answered) return;
+            answered = true;
+
+            const question = questions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            
+            options.forEach((option, index) => {
+                option.style.pointerEvents = 'none';
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                }
+                if (index === selected && selected !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            if (selected === question.correct) {
+                score += question.points;
+                correctCount++;
+            } else {
+                incorrectCount++;
+            }
+
+            document.getElementById('currentScore').textContent = score;
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+            
+            document.getElementById('finalStudentName').textContent = studentName;
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('correctAnswers').textContent = correctCount;
+            document.getElementById('incorrectAnswers').textContent = incorrectCount;
+            
+            const percentage = Math.round((correctCount / questions.length) * 100);
+            document.getElementById('percentage').textContent = percentage + '%';
+
+            let message = '';
+            if (percentage >= 90) {
+                message = '¡Excelente! Dominás el tema 🌟';
+            } else if (percentage >= 75) {
+                message = '¡Muy bien! Buen conocimiento 👏';
+            } else if (percentage >= 60) {
+                message = 'Bien, podés mejorar 📚';
+            } else {
+                message = 'Seguí estudiando, ¡vos podés! 💪';
+            }
+            
+            document.getElementById('performanceMessage').textContent = message;
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            correctCount = 0;
+            incorrectCount = 0;
+            answered = false;
+            
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+            document.getElementById('studentName').value = '';
+        }
+    </script>
+</body>
+</html>
